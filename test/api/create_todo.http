@@ -1,0 +1,8 @@
+POST http://localhost:4040/todos
+Content-Type: application/json
+
+{
+    "title": "Test Todo",
+    "description": "This is a test todo item.",
+    "completed": false
+}
