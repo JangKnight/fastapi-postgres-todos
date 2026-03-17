@@ -1,5 +1,6 @@
 from typing import Annotated, Optional
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import FileResponse
 import models
 from contextlib import asynccontextmanager
 from database import SessionLocal, engine, Base, init_db
@@ -7,15 +8,37 @@ from routers import auth, todos, admin, users
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
 
+USERS = [
+    {"username": "user1", "password": "pass1"},
+    {"username": "user2", "password": "pass2"},
+    {"username": "user3", "password": "pass3"}
+]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
     yield
 
-app = FastAPI(lifespan=lifespan)
-
+app = FastAPI(
+    title="TAPI",
+    description="Todos API built with FastAPI and PostgreSQL",
+    version="1.0.0",
+    lifespan=lifespan
+    )
+origins = [
+    "http://192.168.1.229:4000",
+    "http://localhost:4000"
+    ]
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 async def get_db():
     async with SessionLocal() as session:
@@ -79,3 +102,11 @@ async def update_todo(todo_id: int, todo: TodosRequest, db: db_dependency):
     await db.commit()
     result = await db.execute(select(models.Todos))
     return result.scalars().all()
+
+@app.get("/users")
+async def read_users():
+    return USERS
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("favicon.ico")
