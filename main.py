@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
 
 USERS = [
     {"username": "user1", "password": "pass1"},
@@ -25,7 +26,8 @@ app = FastAPI(
     title="TAPI",
     description="Todos API built with FastAPI and PostgreSQL",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url=None
     )
 origins = [
     "http://192.168.1.229:4000",
@@ -39,6 +41,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        title=app.title,
+        openapi_url=app.openapi_url,
+        swagger_favicon_url="./favicon.ico"
+    )
 
 async def get_db():
     async with SessionLocal() as session:
