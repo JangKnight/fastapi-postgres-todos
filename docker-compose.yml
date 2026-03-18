@@ -1,4 +1,15 @@
 services:
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4444:4444"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - server
   server:
     environment:
       DATABASE_URL: "postgresql+asyncpg://user:password@db:5432/todos"
