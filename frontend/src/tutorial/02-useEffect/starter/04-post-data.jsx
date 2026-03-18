@@ -5,7 +5,7 @@ const PostData = ({ setTodos }) => {
     const formData = new FormData(form.target);
     const newTodo = {
       title: formData.get("title"),
-      description: formData.get("description"),
+      description: formData.get("description") || null,
       priority: parseInt(formData.get("priority")),
       completed: false,
     };
