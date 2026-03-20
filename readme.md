@@ -10,3 +10,7 @@
 4. Open your browser and go to `http://localhost:4444` to see the application in action.
 
 > tip: go to `http://localhost:4000/docs` to access the API documentation.
+
+## Certs
+
+Cert keys are shared for the sake of the project. These files are solely for development and learning purposes and are not intended for production use. They should not be used in a production environment or outside of the development or learning context.

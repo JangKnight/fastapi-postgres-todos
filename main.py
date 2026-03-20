@@ -1,21 +1,17 @@
+import os
 from typing import Annotated, Optional
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import FileResponse
 import models
 from contextlib import asynccontextmanager
-from database import SessionLocal, engine, Base, init_db
-from routers import auth, todos, admin, users
+from database import SessionLocal, engine, Base, init_db, get_db
+from routers import auth, todos
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 
-USERS = [
-    {"username": "user1", "password": "pass1"},
-    {"username": "user2", "password": "pass2"},
-    {"username": "user3", "password": "pass3"}
-]
+base_dir = os.path.dirname(os.path.abspath(__file__))
+favicon_path = os.path.join(base_dir, "favicon.ico")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,13 +25,19 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url=None
     )
+
+
+app.include_router(auth.router)
+app.include_router(todos.router)
+
+# -----Configs-----
 origins = [
-    "http://192.168.1.229:4000",
-    "http://192.168.1.229:4444",
-    "http://localhost:4444",
-    "http://localhost:4000"
-    ]
-# Configure CORS
+    "https://192.168.1.229:4000",
+    "https://192.168.1.229:4444",
+    "https://localhost:4444",
+    "https://localhost:4000"
+]    
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins, 
@@ -52,73 +54,7 @@ async def custom_swagger_ui_html():
         swagger_favicon_url="./favicon.ico"
     )
 
-async def get_db():
-    async with SessionLocal() as session:
-        yield session
-
-db_dependency = Annotated[AsyncSession, Depends(get_db)]
-
-class TodosRequest(BaseModel):
-    title: str
-    description: Optional[str] = Field(min_length=1, max_length=256, default=None)
-    priority: Optional[int] = Field(gt=0, lt=6, default=1)
-    completed: Optional[bool] = Field(default=False)
-
-@app.get("/")
-async def read_all(db: db_dependency):
-    result = await db.execute(select(models.Todos))
-    return result.scalars().all()
-
-@app.get("/todos/{todo_id}")
-async def read_todo(todo_id: int, db: db_dependency):
-    result = await db.execute(select(models.Todos).where(models.Todos.id == todo_id))
-    todo = result.scalars().first()
-    if not todo:
-        raise HTTPException(status_code=404, detail=f"Todo with id {todo_id} not found")
-    return todo
-
-@app.post("/todos/")
-async def create_todo(todo: TodosRequest, db: db_dependency):
-    new_todo = models.Todos(**todo.model_dump())
-    db.add(new_todo)
-    await db.commit()
-    result = await db.execute(select(models.Todos))
-    return result.scalars().all()
-
-@app.delete("/todos/{todo_id}")
-async def read_todo(todo_id: int, db: db_dependency):
-    result = await db.execute(select(models.Todos).where(models.Todos.id == todo_id))
-    todo = result.scalars().first()
-    if not todo:
-        raise HTTPException(status_code=404, detail=f"Todo with id {todo_id} not found")
-    await db.delete(todo)
-    await db.commit()
-    result = await db.execute(select(models.Todos))
-    return result.scalars().all()
-
-@app.put("/todos/{todo_id}")
-# user must send entire object even if fields are not changed as the entire object will be replaced with what is sent
-async def update_todo(todo_id: int, todo: TodosRequest, db: db_dependency):
-    result = await db.execute(select(models.Todos).where(models.Todos.id == todo_id))
-    todo_to_update = result.scalars().first()
-    if not todo_to_update:
-        raise HTTPException(status_code=404, detail=f"Todo with id {todo_id} not found")
-    if todo.title:
-        todo_to_update.title = todo.title
-    if todo.description:
-        todo_to_update.description = todo.description
-    if todo.priority:
-        todo_to_update.priority = todo.priority
-    if todo.completed is not None:
-        todo_to_update.completed = todo.completed
-    await db.commit()
-    result = await db.execute(select(models.Todos))
-    return result.scalars().all()
-
-@app.get("/users")
-async def read_users():
-    return USERS
-
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return FileResponse("favicon.ico")
+    return FileResponse(favicon_path)
+

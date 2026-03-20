@@ -1,8 +1,11 @@
-POST http://localhost:4040/todos
+POST https://localhost:4000/todos
+Accept-Encoding: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlkIjoxLCJleHAiOjE3NzM5ODkxNzl9.PfD3bJXO0eqnmrkbul4W9tNhfP3f_sa6SuQJ7uTEh2Q
 Content-Type: application/json
 
 {
     "title": "Test Todo",
     "description": "This is a test todo item.",
+    "priority": 2,
     "completed": false
 }

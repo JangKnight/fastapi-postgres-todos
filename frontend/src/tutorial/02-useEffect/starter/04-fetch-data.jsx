@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import PostData from "./04-post-data";
-const url = "http://192.168.1.229:4000/";
+const url = "https://192.168.1.229:4000/";
 
 const deleteData = async (id) => {
-  const res = await fetch(`http://192.168.1.229:4000/todos/${id}`, {
+  const res = await fetch(`https://192.168.1.229:4000/todos/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     method: "DELETE",
   });
   if (res.ok) {
@@ -12,12 +15,17 @@ const deleteData = async (id) => {
   }
 };
 
-const FetchData = () => {
+const FetchData = ({ token }) => {
   const [todos, setTodos] = useState([]);
 
   useEffect(() => {
     const fetchTodos = async () => {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        method: "GET",
+      });
       const todos = await res.json();
       console.log(todos);
       setTodos(todos);
@@ -25,10 +33,18 @@ const FetchData = () => {
     fetchTodos();
   }, []);
 
+  if (!Array.isArray(todos)) {
+    return (
+      <>
+        <PostData token={token} />
+        <p>Loading...</p>
+      </>
+    );
+  }
+
   return (
     <>
-      <h2>Todo App</h2>
-      <PostData setTodos={setTodos} />
+      <PostData setTodos={setTodos} token={token} />
       {todos.map((todo) => (
         <div
           key={todo.id}

@@ -13,6 +13,7 @@ services:
   server:
     environment:
       DATABASE_URL: "postgresql+asyncpg://user:password@db:5432/todos"
+      SK: "d11526377ae0bf4490ca4d8642cbcfda3406e2d5c941c7ca0502e4cac9ba723e"
 
     build:
       context: .

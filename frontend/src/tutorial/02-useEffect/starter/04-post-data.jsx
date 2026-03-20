@@ -1,4 +1,4 @@
-const PostData = ({ setTodos }) => {
+const PostData = ({ setTodos, token }) => {
   const postData = async (form) => {
     form.preventDefault();
 
@@ -10,11 +10,16 @@ const PostData = ({ setTodos }) => {
       completed: false,
     };
 
-    const url = "http://192.168.1.229:4000/todos/";
+    const url = "https://192.168.1.229:4000/todos/";
 
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(newTodo),
     });
 
