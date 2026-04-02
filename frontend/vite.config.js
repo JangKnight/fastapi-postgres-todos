@@ -5,14 +5,13 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: true,
+    host: true, // Needed for Docker
     port: 4444,
-
+    strictPort: true,
     allowedHosts: ["anthonysjhenry.com", "www.anthonysjhenry.com", "client"],
     hmr: {
-      host: "anthonysjhenry.com",
+      // The browser connects to Caddy on 443, which then proxies to 4444
       clientPort: 443,
-      protocol: "wss",
     },
     watch: {
       usePolling: true,
