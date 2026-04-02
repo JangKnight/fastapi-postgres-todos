@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
 import PostData from "./04-post-data";
-const url = "https://192.168.1.229:4000/";
-
-const deleteData = async (id) => {
-  const res = await fetch(`https://192.168.1.229:4000/todos/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    method: "DELETE",
-  });
-  if (res.ok) {
-    const updatedTodos = await res.json();
-    setTodos(updatedTodos); // Update UI instantly
-  }
-};
+const url = "/api/";
 
 const FetchData = ({ token }) => {
   const [todos, setTodos] = useState([]);
+
+  const deleteData = async (id) => {
+    const res = await fetch(`/api/todos/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: "DELETE",
+    });
+    if (res.ok) {
+      const updatedTodos = await res.json();
+      setTodos(updatedTodos);
+    }
+  };
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -31,7 +31,7 @@ const FetchData = ({ token }) => {
       setTodos(todos);
     };
     fetchTodos();
-  }, []);
+  }, [token]);
 
   if (!Array.isArray(todos)) {
     return (

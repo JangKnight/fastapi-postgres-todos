@@ -1,25 +1,38 @@
 services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - server
+      - client
+
   client:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "4444:4444"
+    expose:
+      - "4444"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
       - server
+
   server:
-    environment:
-      DATABASE_URL: "postgresql+asyncpg://user:password@db:5432/todos"
-      SK: "d11526377ae0bf4490ca4d8642cbcfda3406e2d5c941c7ca0502e4cac9ba723e"
+    env_file:
+      - .env
 
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
     volumes:
       - .:/app
     depends_on:
@@ -30,32 +43,17 @@ services:
     image: postgres:18-alpine
     container_name: todos_db
     restart: always
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: todos
-    ports:
-      - "5434:5432"
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d todos"]
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: todos_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5053:80"
-    depends_on:
-      db:
-        condition: service_healthy
-
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:

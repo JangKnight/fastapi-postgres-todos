@@ -21,7 +21,7 @@ class Todos(Base):
     description = Column(String, index=False)
     priority = Column(Integer, default=1)
     completed = Column(Boolean, default=False)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
 
     def __init__(self, title: str, description: str = None, priority: int = 1, completed: bool = False, owner_id: int = None):
         self.title = title

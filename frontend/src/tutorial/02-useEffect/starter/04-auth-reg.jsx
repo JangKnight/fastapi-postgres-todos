@@ -12,11 +12,11 @@
 }
 
 import { useState } from "react";
-const url = "https://192.168.1.229:4000/auth";
 
-const AuthReg = () => {
+const url = "/api/auth";
+
+const AuthReg = ({ onUserCreated }) => {
   const [message, setMessage] = useState("");
-
   const postData = async (form) => {
     form.preventDefault();
 
@@ -31,13 +31,17 @@ const AuthReg = () => {
 
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify(data),
     });
 
     if (res.ok) {
       setMessage("User created successfully!");
       form.target.reset();
+      onUserCreated?.();
     } else {
       setMessage("Error creating user.");
     }

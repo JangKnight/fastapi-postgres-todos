@@ -10,19 +10,17 @@ const PostData = ({ setTodos, token }) => {
       completed: false,
     };
 
-    const url = "https://192.168.1.229:4000/todos/";
+    const url = "/api/todos";
 
     const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(newTodo),
     });
-
     if (res.ok) {
       const updatedTodos = await res.json();
       setTodos(updatedTodos);

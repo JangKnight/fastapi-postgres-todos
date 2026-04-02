@@ -32,7 +32,7 @@ async def read_todo(todo_id: int, db: db_dependency, user: user_dependency):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"{user.get('username')} does not have access to todo with id {todo_id}")
     return todo
 
-@router.post("/todos/")
+@router.post("/todos")
 async def create_todo(todo: TodosRequest, db: db_dependency, user: user_dependency):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
